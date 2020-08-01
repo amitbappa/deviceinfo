@@ -11,7 +11,7 @@ import com.thingfarms.deviceinfo.base.AppApplication;
 public class WifiMobileInfo implements DeviceInfo {
     @Override
     public String getDeviceInfoTitle() {
-        return "Wifi/Mobile Info";
+        return "Wifi/Mobile info :";
     }
 
     @Override

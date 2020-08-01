@@ -10,7 +10,7 @@ import java.util.List;
 public class SensorDataInfo implements DeviceInfo {
     @Override
     public String getDeviceInfoTitle() {
-        return "Device Sensor";
+        return "Device sensor info:";
     }
 
     @Override

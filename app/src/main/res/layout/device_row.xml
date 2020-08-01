@@ -45,10 +45,10 @@
             android:textStyle="bold"
             app:layout_constraintLeft_toRightOf="@id/photo"
             app:layout_constraintTop_toTopOf="@id/photo"
-            app:layout_constraintBottom_toTopOf="@id/phone"/>
+            app:layout_constraintBottom_toTopOf="@id/dev_detail"/>
 
         <TextView
-            android:id="@+id/phone"
+            android:id="@+id/dev_detail"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="16dp"
@@ -61,7 +61,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="16dp"
-            app:layout_constraintTop_toBottomOf="@id/phone"
+            app:layout_constraintTop_toBottomOf="@id/dev_detail"
             app:layout_constraintLeft_toRightOf="@id/photo"
             app:layout_constraintBottom_toBottomOf="@id/photo"
             android:visibility="invisible"

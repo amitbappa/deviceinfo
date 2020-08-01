@@ -1,7 +1,6 @@
 package com.thingfarms.deviceinfo;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -10,6 +9,9 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.ProgressBar;
+import android.widget.ViewSwitcher;
 
 import com.thingfarms.deviceinfo.adapter.DeviceInfoAdapter;
 import com.thingfarms.deviceinfo.model.DeviceInfoData;
@@ -31,10 +33,14 @@ import io.reactivex.schedulers.Schedulers;
 public class MainActivity extends AppCompatActivity {
     private final String TAG = this.getClass().getSimpleName();
     private CompositeDisposable disposables = new CompositeDisposable();
-    private DeviceInfoAdapter adapterRV;
+    private DeviceInfoAdapter deviceInfoAdapter;
 
     @BindView(R.id.recyclerView)
     RecyclerView recyclerView;
+    @BindView(R.id.loading)
+    ViewSwitcher viewLoading;
+    @BindView(R.id.progressBar)
+    ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,14 +51,16 @@ public class MainActivity extends AppCompatActivity {
         loadData();
     }
 
-    private void initView()
-    {
+    private void initView() {
         ButterKnife.bind(this);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapterRV = new DeviceInfoAdapter();
-        recyclerView.setAdapter(adapterRV);
+        viewLoading.setVisibility(View.VISIBLE);
+        deviceInfoAdapter = new DeviceInfoAdapter();
+        recyclerView.setAdapter(deviceInfoAdapter);
+
     }
-    private void loadData(){
+
+    private void loadData() {
         getUsersObservable()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -64,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onNext(DeviceInfoData deviceInfo) {
-                        adapterRV.updateData(deviceInfo);
+                        deviceInfoAdapter.updateData(deviceInfo);
                     }
 
                     @Override
@@ -75,16 +83,19 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onComplete() {
                         Log.d(TAG, "completed!");
+                        viewLoading.setVisibility(View.INVISIBLE);
+
                     }
                 });
         //.subscribeWith(new DeviceInfoObserver());
     }
+
     private Observable<DeviceInfoData> getUsersObservable() {
         return DeviceInfoProvider.getDeviceInfoList()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .flatMap((Function<List<DeviceInfoData>, ObservableSource<DeviceInfoData>>) users -> {
-                    adapterRV.setData(users);
+                    deviceInfoAdapter.setData(users);
                     return Observable.fromIterable(users);
                 });
     }
@@ -99,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean hasPermission() {
         return ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_NETWORK_STATE)
-                == PackageManager.PERMISSION_GRANTED ;
+                == PackageManager.PERMISSION_GRANTED;
     }
 
 }

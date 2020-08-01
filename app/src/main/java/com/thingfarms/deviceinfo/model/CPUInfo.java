@@ -7,7 +7,7 @@ public class CPUInfo implements DeviceInfo {
     
     @Override
     public String getDeviceInfoTitle() {
-        return "CPU Info";
+        return "CPU info :";
     }
 
     @Override

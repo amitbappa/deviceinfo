@@ -8,7 +8,7 @@ import java.text.DecimalFormat;
 public class StorageInfo implements DeviceInfo {
     @Override
     public String getDeviceInfoTitle() {
-        return "Storage Info";
+        return "Storage info: ";
     }
 
     @Override

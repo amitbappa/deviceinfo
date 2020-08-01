@@ -22,19 +22,19 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 
-public class DeviceInfoAdapter extends RecyclerView.Adapter<DeviceInfoAdapter.MyViewHolder> {
+public class DeviceInfoAdapter extends RecyclerView.Adapter<DeviceInfoAdapter.ViewHolder> {
 
     private List<DeviceInfoData> deviceInfoDataList = new ArrayList<>();
 
     @NonNull
     @Override
-    public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.device_row, parent, false);
-        return new MyViewHolder(v);
+        return new ViewHolder(v);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         holder.bind(deviceInfoDataList.get(position));
     }
 
@@ -43,7 +43,7 @@ public class DeviceInfoAdapter extends RecyclerView.Adapter<DeviceInfoAdapter.My
         return deviceInfoDataList.size();
     }
 
-    class MyViewHolder extends RecyclerView.ViewHolder {
+    class ViewHolder extends RecyclerView.ViewHolder {
 
         @BindView(R.id.thumbnail)
         TextView thumbnail;
@@ -51,16 +51,11 @@ public class DeviceInfoAdapter extends RecyclerView.Adapter<DeviceInfoAdapter.My
         ViewSwitcher viewSwitcher;
         @BindView(R.id.name)
         TextView name;
-        @BindView(R.id.phone)
+        @BindView(R.id.dev_detail)
         TextView phone;
-        @BindView(R.id.email)
-        TextView email;
-        @BindView(R.id.progressBar)
-        ProgressBar progressBar;
-        @BindView(R.id.todo)
-        TextView todo;
 
-        MyViewHolder(@NonNull View itemView) {
+
+        ViewHolder(@NonNull View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
         }
@@ -71,12 +66,7 @@ public class DeviceInfoAdapter extends RecyclerView.Adapter<DeviceInfoAdapter.My
             name.setText(user.getInfoName());
             phone.setText(user.getInfoDetails());
            // email.setText(user.getEmail());
-
             viewSwitcher.setDisplayedChild(0);
-            /*if (user.getTodoList()!=null && !user.getTodoList().isEmpty()) {
-                viewSwitcher.setDisplayedChild(1);
-                todo.setText(user.getTodoList().size() + " TODOS");
-            }*/
         }
     }
 

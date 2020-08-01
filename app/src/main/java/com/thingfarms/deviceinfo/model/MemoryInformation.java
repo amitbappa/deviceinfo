@@ -10,7 +10,7 @@ import static android.content.Context.ACTIVITY_SERVICE;
 public class MemoryInformation implements DeviceInfo {
     @Override
     public String getDeviceInfoTitle() {
-        return "Memory Info";
+        return "Memory info:";
     }
 
     @Override
