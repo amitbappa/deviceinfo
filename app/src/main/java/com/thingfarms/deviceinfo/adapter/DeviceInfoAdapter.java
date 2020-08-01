@@ -24,7 +24,7 @@ import butterknife.ButterKnife;
 
 public class DeviceInfoAdapter extends RecyclerView.Adapter<DeviceInfoAdapter.MyViewHolder> {
 
-    private List<DeviceInfoData> userList = new ArrayList<>();
+    private List<DeviceInfoData> deviceInfoDataList = new ArrayList<>();
 
     @NonNull
     @Override
@@ -35,12 +35,12 @@ public class DeviceInfoAdapter extends RecyclerView.Adapter<DeviceInfoAdapter.My
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-        holder.bind(userList.get(position));
+        holder.bind(deviceInfoDataList.get(position));
     }
 
     @Override
     public int getItemCount() {
-        return userList.size();
+        return deviceInfoDataList.size();
     }
 
     class MyViewHolder extends RecyclerView.ViewHolder {
@@ -81,13 +81,13 @@ public class DeviceInfoAdapter extends RecyclerView.Adapter<DeviceInfoAdapter.My
     }
 
     public void setData(List<DeviceInfoData> data) {
-        userList.addAll(data);
+        deviceInfoDataList.addAll(data);
         notifyDataSetChanged();
     }
 
     public void updateData(DeviceInfoData user) {
-        userList.set(userList.indexOf(user), user);
-        notifyItemChanged(userList.indexOf(user));
+        deviceInfoDataList.set(deviceInfoDataList.indexOf(user), user);
+        notifyItemChanged(deviceInfoDataList.indexOf(user));
     }
 
     private int randomColor() {
