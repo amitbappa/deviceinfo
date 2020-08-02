@@ -1,23 +1,26 @@
 package com.thingfarms.deviceinfo;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 import android.widget.ViewSwitcher;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.thingfarms.deviceinfo.adapter.DeviceInfoAdapter;
 import com.thingfarms.deviceinfo.model.DeviceInfoData;
 import com.thingfarms.deviceinfo.model.DeviceInfoProvider;
+import com.thingfarms.deviceinfo.util.DeviceInfoUtil;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -34,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
     private final String TAG = this.getClass().getSimpleName();
     private CompositeDisposable disposables = new CompositeDisposable();
     private DeviceInfoAdapter deviceInfoAdapter;
+    public static final int REQUEST_ID_MULTIPLE_PERMISSIONS = 1;
 
     @BindView(R.id.recyclerView)
     RecyclerView recyclerView;
@@ -46,18 +50,18 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         initView();
-        loadData();
+        if (DeviceInfoUtil.checkAndRequestPermissions(this)) {
+            loadData();
+        }
     }
 
     private void initView() {
         ButterKnife.bind(this);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
         viewLoading.setVisibility(View.VISIBLE);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
         deviceInfoAdapter = new DeviceInfoAdapter();
         recyclerView.setAdapter(deviceInfoAdapter);
-
     }
 
     private void loadData() {
@@ -87,16 +91,15 @@ public class MainActivity extends AppCompatActivity {
 
                     }
                 });
-        //.subscribeWith(new DeviceInfoObserver());
     }
 
     private Observable<DeviceInfoData> getUsersObservable() {
-        return DeviceInfoProvider.getDeviceInfoList()
+        return new DeviceInfoProvider().getDeviceInfoList()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .flatMap((Function<List<DeviceInfoData>, ObservableSource<DeviceInfoData>>) users -> {
-                    deviceInfoAdapter.setData(users);
-                    return Observable.fromIterable(users);
+                .flatMap((Function<List<DeviceInfoData>, ObservableSource<DeviceInfoData>>) infos -> {
+                    deviceInfoAdapter.setData(infos);
+                    return Observable.fromIterable(infos);
                 });
     }
 
@@ -106,11 +109,26 @@ public class MainActivity extends AppCompatActivity {
         disposables.dispose();
     }
 
-
-    private boolean hasPermission() {
-        return ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_NETWORK_STATE)
-                == PackageManager.PERMISSION_GRANTED;
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        Log.d(TAG, "Permission callback called-------");
+        switch (requestCode) {
+            case REQUEST_ID_MULTIPLE_PERMISSIONS: {
+                Map<String, Integer> perms = new HashMap<>();
+                perms.put(Manifest.permission.READ_PHONE_STATE, PackageManager.PERMISSION_GRANTED);
+                if (grantResults.length > 0) {
+                    for (int i = 0; i < permissions.length; i++)
+                        perms.put(permissions[i], grantResults[i]);
+                    if (perms.get(Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED
+                            &&        perms.get(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                        loadData();
+                    } else {
+                        Toast.makeText(this, "Go to settings and enable permissions", Toast.LENGTH_LONG)
+                                .show();
+                    }
+                }
+            }
+        }
     }
-
 }

@@ -4,7 +4,6 @@ import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.ViewSwitcher;
 
@@ -23,7 +22,6 @@ import butterknife.ButterKnife;
 
 
 public class DeviceInfoAdapter extends RecyclerView.Adapter<DeviceInfoAdapter.ViewHolder> {
-
     private List<DeviceInfoData> deviceInfoDataList = new ArrayList<>();
 
     @NonNull
@@ -52,8 +50,7 @@ public class DeviceInfoAdapter extends RecyclerView.Adapter<DeviceInfoAdapter.Vi
         @BindView(R.id.name)
         TextView name;
         @BindView(R.id.dev_detail)
-        TextView phone;
-
+        TextView detailInfo;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -64,8 +61,7 @@ public class DeviceInfoAdapter extends RecyclerView.Adapter<DeviceInfoAdapter.Vi
             thumbnail.setTextColor(randomColor());
             thumbnail.setText(String.valueOf(user.getInfoName().toUpperCase().charAt(0)));
             name.setText(user.getInfoName());
-            phone.setText(user.getInfoDetails());
-           // email.setText(user.getEmail());
+            detailInfo.setText(user.getInfoDetails());
             viewSwitcher.setDisplayedChild(0);
         }
     }
