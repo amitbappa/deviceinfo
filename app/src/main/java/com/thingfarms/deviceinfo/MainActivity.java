@@ -1,112 +1,58 @@
 package com.thingfarms.deviceinfo;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.ProgressBar;
+import android.widget.Button;
 import android.widget.Toast;
-import android.widget.ViewSwitcher;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
-import com.thingfarms.deviceinfo.adapter.DeviceInfoAdapter;
-import com.thingfarms.deviceinfo.model.DeviceInfoData;
-import com.thingfarms.deviceinfo.model.DeviceInfoProvider;
 import com.thingfarms.deviceinfo.util.DeviceInfoUtil;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import io.reactivex.Observable;
-import io.reactivex.ObservableSource;
-import io.reactivex.Observer;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Function;
-import io.reactivex.schedulers.Schedulers;
 
-public class MainActivity extends AppCompatActivity {
+
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private final String TAG = this.getClass().getSimpleName();
-    private CompositeDisposable disposables = new CompositeDisposable();
-    private DeviceInfoAdapter deviceInfoAdapter;
     public static final int REQUEST_ID_MULTIPLE_PERMISSIONS = 1;
-
-    @BindView(R.id.recyclerView)
-    RecyclerView recyclerView;
-    @BindView(R.id.loading)
-    ViewSwitcher viewLoading;
-    @BindView(R.id.progressBar)
-    ProgressBar progressBar;
+    @BindView(R.id.btn_appinfo)
+    Button btn_appinfo;
+    @BindView(R.id.btn_webrtc)
+    Button btn_webrtc;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initView();
-        if (DeviceInfoUtil.checkAndRequestPermissions(this)) {
-            loadData();
+        addListener();
+        if (!DeviceInfoUtil.checkAndRequestPermissions(this)) {
+            Toast.makeText(this, R.string.permission_msg, Toast.LENGTH_LONG)
+                    .show();
         }
     }
 
     private void initView() {
         ButterKnife.bind(this);
-        viewLoading.setVisibility(View.VISIBLE);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        deviceInfoAdapter = new DeviceInfoAdapter();
-        recyclerView.setAdapter(deviceInfoAdapter);
     }
 
-    private void loadData() {
-        getUsersObservable()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<DeviceInfoData>() {
-                    @Override
-                    public void onSubscribe(Disposable d) {
-                        disposables.add(d);
-                    }
+    private void addListener() {
+        btn_appinfo.setOnClickListener(this);
+        btn_webrtc.setOnClickListener(this);
 
-                    @Override
-                    public void onNext(DeviceInfoData deviceInfo) {
-                        deviceInfoAdapter.updateData(deviceInfo);
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        Log.e(TAG, e.getMessage());
-                    }
-
-                    @Override
-                    public void onComplete() {
-                        Log.d(TAG, "completed!");
-                        viewLoading.setVisibility(View.INVISIBLE);
-
-                    }
-                });
-    }
-
-    private Observable<DeviceInfoData> getUsersObservable() {
-        return new DeviceInfoProvider().getDeviceInfoList()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .flatMap((Function<List<DeviceInfoData>, ObservableSource<DeviceInfoData>>) infos -> {
-                    deviceInfoAdapter.setData(infos);
-                    return Observable.fromIterable(infos);
-                });
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        disposables.dispose();
     }
 
     @Override
@@ -117,18 +63,52 @@ public class MainActivity extends AppCompatActivity {
             case REQUEST_ID_MULTIPLE_PERMISSIONS: {
                 Map<String, Integer> perms = new HashMap<>();
                 perms.put(Manifest.permission.READ_PHONE_STATE, PackageManager.PERMISSION_GRANTED);
+                perms.put(Manifest.permission.CAMERA, PackageManager.PERMISSION_GRANTED);
+                perms.put(Manifest.permission.WRITE_EXTERNAL_STORAGE, PackageManager.PERMISSION_GRANTED);
+
                 if (grantResults.length > 0) {
                     for (int i = 0; i < permissions.length; i++)
                         perms.put(permissions[i], grantResults[i]);
-                    if (perms.get(Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED
-                            &&        perms.get(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-                        loadData();
+                    if (perms.get(Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED &&
+                            perms.get(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED &&
+                            perms.get(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED &&
+                            perms.get(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
+                            perms.get(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED &&
+                            perms.get(Manifest.permission.MODIFY_AUDIO_SETTINGS) == PackageManager.PERMISSION_GRANTED
+                    ) {
+                        addListener();
                     } else {
-                        Toast.makeText(this, "Go to settings and enable permissions", Toast.LENGTH_LONG)
+                        Toast.makeText(this, R.string.permission_msg, Toast.LENGTH_LONG)
                                 .show();
                     }
                 }
             }
         }
     }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.btn_appinfo:
+
+                if (!DeviceInfoUtil.checkAndRequestPermissions(this)) {
+                    Toast.makeText(this, R.string.permission_msg, Toast.LENGTH_LONG)
+                            .show();
+                } else {
+                    startActivity(new Intent(MainActivity.this, DevInfoActivity.class));
+
+                }
+                break;
+            case R.id.btn_webrtc:
+                if (!DeviceInfoUtil.checkAndRequestPermissions(this)) {
+                    Toast.makeText(this, R.string.permission_msg, Toast.LENGTH_LONG)
+                            .show();
+                } else {
+                    startActivity(new Intent(MainActivity.this, WebRTCActivity.class));
+                }
+                break;
+        }
+    }
+
+
 }
